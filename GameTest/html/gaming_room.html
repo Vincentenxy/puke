@@ -1,0 +1,502 @@
+<!-- 游戏中房间 -->
+
+<!DOCTYPE>
+<html>
+
+<head>
+    <title>房间页面</title>
+    <meta charset="utf-8">
+
+    <script src="../lib/vue.js" type="text/javascript"></script>
+    <script src="../lib/vue-resource.js" type="text/javascript"></script>
+
+    <style>
+        img:hover {
+            border: 3px solid yellow;
+        }
+
+        .btn_put_puke {
+            background-color: coral;
+        }
+
+        .btn_diatribute_pule {
+            background-color: chartreuse;
+            border: 1px sold blue;
+        }
+
+        .sty_puke_list {
+            float: left;
+            padding: 5px 0 5px 3px;
+            border: 3px solid greenyellow;
+        }
+
+        .sty_puke_selected {
+            /*被选中的扑克的样式*/
+            float: left;
+            padding: 5px 0 5px 3px;
+            border: 3px solid red;
+        }
+    </style>
+
+
+
+</head>
+
+<body>
+    <div style="margin: 0 auto; background-color: yellow; height: 900px;">
+        <!-- 顶部 -->
+        <div style="height: 10%; background-color: honeydew;">
+
+        </div>
+        <!-- 中间玩家桌面 -->
+        <div id="room" style="height: 80%; background-color: green; ">
+            <div style="background-color: hotpink; height: 70%;">
+                <div style="background-color: blueviolet; height: 100%; width:20%; float: left;">
+                    左边玩家
+                    <div v-for="item in list1" style=" height: 30px; width:99%; border: 1px solid yellow;">
+                        {{item.id}}
+                    </div>
+
+                </div>
+                <div style="background-color: darkgray; height: 100%; width: 60%; float: left;">
+
+                    中间桌面
+                    <div>
+                        <button v-bind:class="['btn_diatribute_pule']" v-on:click="productAnyNums">发牌</button>
+                        <button v-bind:style="sty_btn" v-on:click="putPukes" v-bind:disabled="disableFlag">出牌</button>
+                        <button v-on:click="sendAjax" >发送ajaxq请求</button>
+
+                    </div>
+                    <!-- 渲染要出的牌 -->
+                    <div>
+                        <img v-for="item in list_put_puke" class="sty_puke_list" v-bind:src="item.src" style="height: 100x; width:100px;">
+                    </div>
+                </div>
+                <div style="background-color: coral; height: 100%; width: 20%; float: left;">
+                    右边玩家
+                    <div v-for="item in list1" style=" height: 30px; width:99%; border: 1px solid yellow;">
+                        {{item.id}}
+                    </div>
+
+
+                </div>
+            </div>
+            <div style="background-color: blue; height: 30%;">
+                <div id="poker_list" style="height: 200px; width: 1000px; border: 1px solid black; margin:0 auto">
+                    <div v-for="(item, key) in list_my_puke" v-on:click="select(item, key)"
+                        v-bind:class=" sty_list[key]==key ? 'sty_puke_selected': 'sty_puke_list' ">
+
+                        <!-- v-bind:class=" selected ? 'sty_puke_list': 'sty_puke_selected' "> -->
+
+
+                        <img v-bind:src="item.src" style="height: 100px; width:100px;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <script type="text/javascript">
+            var pokerList = new Vue({
+                el: "#room",
+                data: {
+                    selected: false,
+                    disableFlag:true,   //只有disables属性设置为false，才会取消这个属性，使得butten可使用，其余情况都是disabled,butten不可使用
+                    sty_btn: {
+                        background: "red",
+                        border: "1px solid yellow"
+                    },
+                    sty_list: [
+                        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+                    ],
+                    sty_btn_selected: {  //已选中扑克样式
+                        border: "3px solid green"
+                    },
+                    self_pork_list: {
+                        "1": "aaa",
+                        "2": "bbb",
+                        "3": "ccc",
+                        "4": "ddd",
+                        "5": "eee",
+                        "6": "fff",
+                        "7": "ggg",
+                        "8": "999"
+                    },
+                    list1: [
+
+                    ],
+                    list_selected_put_puke: [   //玩家出的牌
+                    ],
+                    list_put_puke:[ //最终提交的牌
+
+                    ],
+                    list_my_puke: [  //自己的牌 
+                    ],
+                    list_three_pukes: [  //最后三张底牌
+                    ],
+                    list_lastPlayer_puke: [   //桌面现有的牌
+
+                        // { id: "1", num: "1", suit: "club", src: "../imgs/puke/ace-club.png" },
+
+                        // { id: "9", num: "3", suit: "club", src: "../imgs/puke/three-club.png" },
+                        // { id: "11", num: "3", suit: "heart", src: "../imgs/puke/three-heart.png" }
+
+                        // { id: "13", num: "4", suit: "club", src: "../imgs/puke/four-club.png" },
+                        // { id: "18", num: "5", suit: "diamond", src: "../imgs/puke/five-diamond.png" },
+                        // { id: "24", num: "6", suit: "spade", src: "../imgs/puke/six-spade.png" },
+                        // { id: "27", num: "7", suit: "heart", src: "../imgs/puke/seven-heart.png" }
+                        // { id: "30", num: "8", suit: "diamond", src: "../imgs/puke/eight-diamond.png" },
+                        // { id: "36", num: "9", suit: "spade", src: "../imgs/puke/nine-spade.png" },
+                        // { id: "40", num: "10", suit: "spade", src: "../imgs/puke/ten-spade.png" },
+                        // { id: "43", num: "11", suit: "spade", src: "../imgs/puke/jack-spade.png" },
+                        // { id: "45", num: "12", suit: "diamond", src: "../imgs/puke/queen-diamond.png" },
+                        // { id: "52", num: "13", suit: "club", src: "../imgs/puke/king-club.png" }
+
+                        // { id: "25", num: "7", suit: "club", src: "../imgs/puke/seven-club.png" },
+                        // { id: "26", num: "7", suit: "diamond", src: "../imgs/puke/seven-diamond.png" },
+                        { id: "27", num: "7", suit: "heart", src: "../imgs/puke/seven-heart.png" }
+                        // { id: "8", num: "2", suit: "spade", src: "../imgs/puke/two-spade.png" }
+                    ],
+                    list_puke_all: [ //所有扑克以及路径
+                        { id: "0", num: "-1", src: "../imgs/puke/ace-club.png" },
+                        { id: "1", num: "1", suit: "club", src: "../imgs/puke/ace-club.png" },
+                        { id: "2", num: "1", suit: "diamond", src: "../imgs/puke/ace-diamond.png" },
+                        { id: "3", num: "1", suit: "heart", src: "../imgs/puke/ace-heart.png" },
+                        { id: "4", num: "1", suit: "spade", src: "../imgs/puke/ace-spade.png" },
+                        { id: "5", num: "2", suit: "club", src: "../imgs/puke/two-club.png" },
+                        { id: "6", num: "2", suit: "diamond", src: "../imgs/puke/two-diamond.png" },
+                        { id: "7", num: "2", suit: "heart", src: "../imgs/puke/two-heart.png" },
+                        { id: "8", num: "2", suit: "spade", src: "../imgs/puke/two-spade.png" },
+                        { id: "9", num: "3", suit: "club", src: "../imgs/puke/three-club.png" },
+                        { id: "10", num: "3", suit: "diamond", src: "../imgs/puke/three-diamond.png" },
+                        { id: "11", num: "3", suit: "heart", src: "../imgs/puke/three-heart.png" },
+                        { id: "12", num: "3", suit: "spade", src: "../imgs/puke/three-spade.png" },
+                        { id: "13", num: "4", suit: "club", src: "../imgs/puke/four-club.png" },
+                        { id: "14", num: "4", suit: "diamond", src: "../imgs/puke/four-diamond.png" },
+                        { id: "15", num: "4", suit: "heart", src: "../imgs/puke/four-heart.png" },
+                        { id: "16", num: "4", suit: "spade", src: "../imgs/puke/four-spade.png" },
+                        { id: "17", num: "5", suit: "club", src: "../imgs/puke/five-club.png" },
+                        { id: "18", num: "5", suit: "diamond", src: "../imgs/puke/five-diamond.png" },
+                        { id: "19", num: "5", suit: "heart", src: "../imgs/puke/five-heart.png" },
+                        { id: "20", num: "5", suit: "spade", src: "../imgs/puke/five-spade.png" },
+                        { id: "21", num: "6", suit: "club", src: "../imgs/puke/six-club.png" },
+                        { id: "22", num: "6", suit: "diamond", src: "../imgs/puke/six-diamond.png" },
+                        { id: "23", num: "6", suit: "heart", src: "../imgs/puke/six-heart.png" },
+                        { id: "24", num: "6", suit: "spade", src: "../imgs/puke/six-spade.png" },
+                        { id: "25", num: "7", suit: "club", src: "../imgs/puke/seven-club.png" },
+                        { id: "26", num: "7", suit: "diamond", src: "../imgs/puke/seven-diamond.png" },
+                        { id: "27", num: "7", suit: "heart", src: "../imgs/puke/seven-heart.png" },
+                        { id: "28", num: "7", suit: "spade", src: "../imgs/puke/seven-spade.png" },
+                        { id: "29", num: "8", suit: "club", src: "../imgs/puke/eight-club.png" },
+                        { id: "30", num: "8", suit: "diamond", src: "../imgs/puke/eight-diamond.png" },
+                        { id: "31", num: "8", suit: "heart", src: "../imgs/puke/eight-heart.png" },
+                        { id: "32", num: "8", suit: "spade", src: "../imgs/puke/eight-spade.png" },
+                        { id: "33", num: "9", suit: "club", src: "../imgs/puke/nine-club.png" },
+                        { id: "34", num: "9", suit: "diamond", src: "../imgs/puke/nine-diamond.png" },
+                        { id: "35", num: "9", suit: "heart", src: "../imgs/puke/nine-heart.png" },
+                        { id: "36", num: "9", suit: "spade", src: "../imgs/puke/nine-spade.png" },
+                        { id: "37", num: "10", suit: "club", src: "../imgs/puke/ten-club.png" },
+                        { id: "38", num: "10", suit: "diamond", src: "../imgs/puke/ten-diamond.png" },
+                        { id: "39", num: "10", suit: "heart", src: "../imgs/puke/ten-heart.png" },
+                        { id: "40", num: "10", suit: "spade", src: "../imgs/puke/ten-spade.png" },
+                        { id: "41", num: "11", suit: "diamond", src: "../imgs/puke/jack-diamond.png" },
+                        { id: "42", num: "11", suit: "heart", src: "../imgs/puke/jack-heart.png" },
+                        { id: "43", num: "11", suit: "spade", src: "../imgs/puke/jack-spade.png" },
+                        { id: "44", num: "11", suit: "club", src: "../imgs/puke/jack-club.png" },
+                        { id: "45", num: "12", suit: "diamond", src: "../imgs/puke/queen-diamond.png" },
+                        { id: "46", num: "12", suit: "heart", src: "../imgs/puke/queen-heart.png" },
+                        { id: "47", num: "12", suit: "spade", src: "../imgs/puke/queen-spade.png" },
+                        { id: "48", num: "12", suit: "club", src: "../imgs/puke/queen-club.png" },
+                        { id: "49", num: "13", suit: "diamond", src: "../imgs/puke/king-diamond.png" },
+                        { id: "50", num: "13", suit: "heart", src: "../imgs/puke/king-heart.png" },
+                        { id: "51", num: "13", suit: "spade", src: "../imgs/puke/king-spade.png" },
+                        { id: "52", num: "13", suit: "club", src: "../imgs/puke/king-club.png" },
+                        { id: "53", num: "14", suit: "small", src: "../imgs/puke/joker-small.png" },
+                        { id: "54", num: "15", suit: "big", src: "../imgs/puke/joker-big.png" }
+                    ]
+
+
+                },
+                methods: {
+
+                    productAnyNums() {   //生成17个1-54之间的整数，模拟用户的牌
+                        this.list_my_puke = [];
+                        this.list_selected_put_puke = [];
+                        var list_temp_puke = [];
+                        this.sty_list = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+                        while (list_temp_puke.length < 17) { //产生17张不一样的牌
+                            var num = Math.ceil(Math.random() * 54);
+                            var index_num = list_temp_puke.findIndex(item => {
+                                if (item == num) {
+                                    return true;
+                                }
+                            });
+                            if (index_num == -1) {
+                                list_temp_puke.push(num);
+                            }
+                        }
+                        list_temp_puke.sort((a, b) => { return b - a; });
+
+                        //调整A和2的位置
+                        var index_AandTwo = list_temp_puke.findIndex(item => {
+                            return item <= 8;
+                        });
+                        var index_joker = list_temp_puke.findIndex(item => { //找到king的位置
+                            return item <= 52;
+                        });
+
+                        if (index_AandTwo != -1) {    //找到了A和2
+                            list_temp_puke.splice(index_AandTwo, 17 - index_AandTwo).forEach(item => {
+                                list_temp_puke.splice(index_joker, 0, item);
+                                index_joker++;
+                            });
+                        }
+                        list_temp_puke.forEach(ele => {
+                            this.list_puke_all.some((item) => {
+                                if (item.id == ele) {
+                                    this.list_my_puke.push(item);
+                                }
+                            });
+                        });
+
+                    },
+                    select(ele, ind) {   //玩家鼠标点击选牌
+                        this.sty_list[ind] == -1 ? this.sty_list[ind] = ind : this.sty_list[ind] = -1;
+                        var index = this.list_selected_put_puke.findIndex(item => {
+                            if (item.id == ele.id) {
+                                return true;
+                            }
+                        });
+
+                        if (index !== -1) { //元素已经存在，就删除元素
+                            this.list_selected_put_puke.splice(index, 1);
+                        } else {  //将元素存进列表
+                            this.list_selected_put_puke.push(ele);
+                        }
+                        this.$forceUpdate();    //强制刷新for列表
+
+                        var last_player_puke_statue = this.judgePukeStatue(this.list_lastPlayer_puke);   //计算上一个玩家的牌的种类
+                        var my_puke_statue = this.judgePukeStatue(this.list_selected_put_puke);   //判断玩家选择后牌的种类
+                        //判断出牌按钮是否可用
+                        if (last_player_puke_statue == 1) { //上家单张
+                            if (my_puke_statue == 1) {
+                                if ((this.list_lastPlayer_puke[0].num >= 3 && this.list_lastPlayer_puke[0].num <= 13) && this.list_selected_put_puke[0].num <= 2) {   //对A和2的情况单独处理
+                                    this.sty_btn.background = "green";
+                                    this.disableFlag = false;   
+                                } else if (parseInt(this.list_selected_put_puke[0].num) > parseInt(this.list_lastPlayer_puke[0].num)) {   //我的牌--》单张，且大于上家
+                                    this.sty_btn.background = "green";
+                                    this.disableFlag = false;
+                                } else {
+                                    this.sty_btn.background = "red";
+                                    this.disableFlag = true;
+                                }
+                            } else if (my_puke_statue == 22 || my_puke_statue == 4) {    //我的牌--》王炸
+                                this.sty_btn.background = "green";
+                                this.disableFlag = false;
+                            } else {    //其余情况不可出牌
+                                this.sty_btn.background = "red";
+                                this.disableFlag = true;
+                            }
+                        } else if (last_player_puke_statue == 2) {   //上家对子
+                            if (my_puke_statue == 2) {    //我的牌--》对子
+                                if ((this.list_lastPlayer_puke[0].num >= 5 && this.list_lastPlayer_puke[0].num) <= 13 && this.list_selected_put_puke[0].num <= 2) {   //对A和2情况处理
+                                    this.sty_btn.background = "green";
+                                    this.disableFlag = false;
+                                } else if (parseInt(this.list_selected_put_puke[0].num) > parseInt(this.list_lastPlayer_puke[0].num)) {   //大于上家牌
+                                    this.sty_btn.background = "green";
+                                    this.disableFlag = false;
+                                } else {
+                                    this.sty_btn.background = "red";
+                                    this.disableFlag = true;
+                                }
+                            } else if (my_puke_statue == 4 || my_puke_statue == 22) { //我的牌--》炸弹
+                                this.sty_btn.background = "green";
+                                this.disableFlag = false;
+                            } else {
+                                this.sty_btn.background = "red";
+                                this.disableFlag = true;
+                            }
+                        } else if (last_player_puke_statue == 3) {   //上家3带1
+                            if (my_puke_statue == 3) {    //我的牌--》3带1
+                                if (this.list_selected_put_puke[0].num >= 14 || this.list_selected_put_puke[3].num >= 14) { //3带1不可以带王
+                                    this.sty_btn.background = "red";
+                                    this.disableFlag = false;
+                                } else if ((this.list_lastPlayer_puke[1].num >= 3 && this.list_lastPlayer_puke[1].num <= 13) && parseInt(this.list_selected_put_puke[1].num) <= 2) {   //对A和2的情况单独处理
+                                    this.sty_btn.background = "green";
+                                    this.disableFlag = false;
+                                } else if (parseInt(this.list_selected_put_puke[1].num) > parseInt(this.list_lastPlayer_puke[1].num)) {   //取第2张，牌列表经过排序后，单张只有在第一张或者最后一张
+                                    this.sty_btn.background = "green";
+                                    this.disableFlag = false;
+                                } else {
+                                    this.sty_btn.background = "red";
+                                    this.disableFlag = true;
+                                }
+                            } else if (my_puke_statue == 4 || my_puke_statue == 22) {  //我的牌--》炸弹
+                                this.sty_btn.background = "green";
+                                this.disableFlag = false;
+                            } else {
+                                this.sty_btn.background = "red";
+                                this.disableFlag = true;
+                            }
+                        } else if (last_player_puke_statue == 4) {   //上家炸弹
+
+                            if (my_puke_statue == 4) {
+                                if ((this.list_lastPlayer_puke[0].num >= 3 && this.list_lastPlayer_puke[0].num <= 13) && this.list_selected_put_puke[0] <= 2) {   //对A和2单独进行处理
+                                    this.sty_btn.background = "green";
+                                    this.disableFlag = false;
+                                } else if (parseInt(this.list_selected_put_puke[0].num) > parseInt(this.list_lastPlayer_puke[0].num)) {   //我的牌--》炸弹，且大于上家
+                                    this.sty_btn.background = "green";
+                                    this.disableFlag = false;
+                                } else {
+                                    this.sty_btn.background = "red";
+                                    this.disableFlag = true;
+                                }
+                            } else if (my_puke_statue == 22) { //我的牌--》王炸
+                                this.sty_btn.background = "green";
+                                this.disableFlag = false;
+                            } else {
+                                this.sty_btn.background = "red";
+                                this.disableFlag = true;
+                            }
+                        } else if (last_player_puke_statue >= 5 && last_player_puke_statue <= 12) {    //上家顺子
+                            if (my_puke_statue >= 5 && my_puke_statue <= 12) {    //我的牌--》顺子
+                                if (my_puke_statue === last_player_puke_statue) {   //和上家牌数量一样,且最小值大于上家最小值
+                                    if (this.list_selected_put_puke[0].num == 1) { //不能使用===
+                                        this.list_selected_put_puke.push(this.list_selected_put_puke.shift());   //将头部A放到尾部
+                                    }
+                                    if (parseInt(this.list_selected_put_puke[0].num) > parseInt(this.list_lastPlayer_puke[0].num)) {
+                                        this.sty_btn.background = "green";
+                                        this.disableFlag = false;
+                                    }
+                                } else {
+                                    this.sty_btn.background = "red";
+                                    this.disableFlag = treu;
+                                }
+                            } else if (my_puke_statue == 22) {    //我的牌--》王炸
+                                this.sty_btn.background = "green";
+                                this.disableFlag = false;
+                            } else {
+                                this.sty_btn.background = "red";
+                                this.disableFlag = true;
+                            }
+                        } else if (last_player_puke_statue == 22) {    //上家王炸
+                            this.sty_btn.background = "green";
+                            this.disableFlag = false;
+                        } else {  //不是其中任何情况，出牌按钮不可用
+                            this.sty_btn.background = "red";
+                            this.disableFlag = true;
+                        }
+
+                        console.log("lastPlayerpuke ======> "+ JSON.stringify(this.list_lastPlayer_puke));
+                        console.log("my puke ======>" + my_puke_statue + "==========>" + last_player_puke_statue + "==============>" + JSON.stringify(this.list_selected_put_puke));
+
+                    }, judgePukeStatue(l_list) {
+
+                        if (l_list.length > 0) {
+                            l_list.sort((a, b) => {
+                                // return b.id -a.id;
+                                return a.id - b.id;
+                            });
+                        }
+                        if (l_list.length == 1) {  //单张
+                            console.log("单张");
+                            return 1;   //返回单张
+                        } else if (l_list.length == 2) {    //对、王炸
+                            console.log("l_lis==>" + JSON.stringify(l_list));
+                            if ((l_list[0].num == 15 && l_list[1].num == 14) || (l_list[0].num == 14 && l_list[1].num == 15)) {
+                                console.log("王炸");
+                                return 22;  //返回王炸
+                            } else if (l_list[0].num == l_list[1].num) {
+                                console.log("对子");
+                                return 2;   //返回对子
+                            } else {
+                                console.log("不是对子");
+                                return -1;
+                            }
+
+                        } else if (l_list.length == 4) {
+                            console.log("-=======>" + JSON.stringify(l_list))
+                            if (l_list[0].num === l_list[1].num &&
+                                l_list[0].num === l_list[2].num &&
+                                l_list[0].num === l_list[3].num) {    //炸弹
+                                console.log("炸弹");
+                                return 4;   //返回炸弹
+                            } else if ((l_list[3].num == l_list[1].num && l_list[3].num == l_list[2].num && l_list[3].num != l_list[0].num)  || 
+                                        (l_list[0].num == l_list[1].num && l_list[0].num == l_list[2].num && l_list[0].num != l_list[3].num)) { //三带一， 此行针对A和2的情况
+                                console.log("3带1");
+                                return 3;   //返回3带1
+                            }
+                        } else if (l_list.length >= 5 && l_list.length <= 12) {    //顺子5张，到最多12张
+                            var begin_ind = 1;  //开始排查的位置
+                            if (parseInt(l_list[0].num) == 2 || parseInt(l_list[1].num) == 2) { //包含2不是顺子
+                                console.log("不是顺子");
+                                return -1;
+                            } else if (parseInt(l_list[0].num) == 1) {
+                                if (parseInt(l_list[l_list.length - 1].num) != 13) {    //包含A但不包含K，不是顺子
+                                    console.log("不是顺子");
+                                    return -1;
+                                } else {
+                                    begin_ind = 2;  //从第二个位置开始
+                                }
+                            }
+                            for (; begin_ind < l_list.length; begin_ind++) {
+                                console.log(l_list[begin_ind].num + "   --   " + l_list[begin_ind - 1].num);
+                                if (parseInt(l_list[begin_ind].num) != parseInt(l_list[begin_ind - 1].num) + 1) {    //不是连续的牌
+                                    console.log("不是顺子 == >" + begin_ind);
+                                    return -1;
+                                }
+                            }
+                            console.log("顺子");
+                            return l_list.length;   //返回顺子的个数
+                        }
+                    },
+                    putPukes() { //点击出牌
+                        this.sty_list = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+                        if (this.list_selected_put_puke.length <= 0) {
+                            console.log("请选选中要出的牌")
+                        } else {
+                            // 删除玩家本地的牌
+                            this.list_selected_put_puke.sort();
+                            for (var i = 0; i < this.list_selected_put_puke.length; i++) {
+                                this.list_my_puke.some((item, index) => {
+                                    if (item.id == this.list_selected_put_puke[i].id) {
+                                        this.list_my_puke.splice(index, 1);
+                                        return true;
+                                    }
+                                });
+                            }
+                            this.list_put_puke = this.list_selected_put_puke;   //将要出的牌赋值过去
+                            this.list_selected_put_puke = [];   //删除响应牌后清空
+                            this.disableFlag = true;   //出牌标志置灰,true是添加disabled属性
+                        } 
+
+                    },
+                    sendAjax(){ //发送ajax请求
+                        // this.$http.get("http://localhost:8888/login?unam=asfe&passwd=123456").then(function(resp){
+                        //     console.log("请求成功"+JSON.stringify(resp))
+                        // },function(resp){   //请求失败处理
+                        //     console.log("请求失败")
+                        // });
+                        
+                        //post请求
+                        var url = "http://localhost:8888";
+                        var reqData = "oth?uname=aaaa&passwd=123456";
+                        this.$http.post(url,reqData,"").then((resp)=>{
+                            console.log("请求成功=》"+ JSON.stringify(resp))
+
+                            console.log("请求成功=》"+ resp.bodyText)
+                        },(resp)=>{
+                            console.log("请求失败")
+                        });
+
+                    }
+                
+                    
+                    
+                }
+            });
+
+        </script>
+</body>
+
+</html>
